@@ -56,7 +56,6 @@ def fab_dataset(
         ## try one character at a time first
         src_mz_list.append(np.asarray(np.round(this_mz/mz_resolution).flatten(), int).tolist())
         src_ms_list.append(np.asarray(np.round(this_ms/ms_resolution).flatten(), int).tolist())
-        print(smiles)
         tgt_sm_list.append([vocabs_dict[s] for s in smiles])
 
         n_smiles_characs_max = max(n_smiles_characs_max, len(smiles))

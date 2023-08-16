@@ -35,14 +35,12 @@ def read_cfmid_ms_file(path):
         
     return lines, smiles, inchikey, peaks, frags_indices, frags_details, frags_smiles
 
-def fab_raw_data_file(file_name="./data/raw_ms_smiles_data.pkl", num=None):
+def fab_raw_data_file(file_name="./data/raw_ms_smiles_data_trial.pkl", num=-1):
     cfmid_ms_path = "/home/lrl/dataset/zinc_mirror_ms/"
     cfmid_ms_files = [cfmid_ms_path + p for p in os.listdir(cfmid_ms_path)]
 
     peaks_cache = []
-    smiles_file = open('./data/smiles.txt', 'w+')
-
-    if num:
+    with open('./data/smiles.txt', 'w+') as smiles_file:
         count = 0
         for cfmid_ms_file in tqdm(cfmid_ms_files, ncols=80):
             _, smiles, inchikey, peaks, frags_indices, frags_details, frags_smiles = read_cfmid_ms_file(cfmid_ms_file)
@@ -52,14 +50,8 @@ def fab_raw_data_file(file_name="./data/raw_ms_smiles_data.pkl", num=None):
             count += 1
             if count == num:
                 break
-    else:
-        for cfmid_ms_file in tqdm(cfmid_ms_files, ncols=80):
-            _, smiles, inchikey, peaks, frags_indices, frags_details, frags_smiles = read_cfmid_ms_file(cfmid_ms_file)
-            peaks_cache.append([smiles, inchikey, peaks, frags_indices, frags_details, frags_smiles])
-            smiles_file.write(smiles + '\n')
-
+            
     pickle.dump(peaks_cache, open(file_name, 'wb'))
-    smiles_file.close()
 
 if __name__ == '__main__':
-    fab_raw_data_file(file_name='./data/raw_ms_smiles_data_trial.pkl', num=10000)
+    fab_raw_data_file()
