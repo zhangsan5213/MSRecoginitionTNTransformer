@@ -12,6 +12,7 @@ import transformer.Constants as Constants
 from dataset import MZMSDataset, paired_collate_fn
 from transformer.ModelsDoubleChannelFuse import Tensorized_T
 from transformer.Optim import ScheduledOptim
+from transformer.Constants import BOS, EOS
 
 from data_ms import fab_raw_data_file
 from data_get_vocab import dump_vocab
@@ -173,11 +174,10 @@ def train(model, training_data, validation_data, optimizer, device, opt):
             'epoch': epoch_i}
 
         if opt.save_model:
+            model_name = opt.save_model + '_accu_{train_accu:3.3f}_{valid_accu:3.3f}.chkpt'.format(train_accu=100*train_accu, valid_accu=100*valid_accu)
             if opt.save_mode == 'all':
-                model_name = opt.save_model + '_accu_{train_accu:3.3f}_{valid_accu:3.3f}.chkpt'.format(train_accu=100*train_accu, valid_accu=100*valid_accu)
                 torch.save(checkpoint, model_name)
             elif opt.save_mode == 'best':
-                model_name = opt.save_model + '.chkpt'
                 if valid_accu >= max(valid_accus):
                     torch.save(checkpoint, model_name)
                     print('    - [Info] The checkpoint file has been updated.')
@@ -230,15 +230,15 @@ if __name__ == '__main__':
     parser.add_argument('--data_path_name', default='./data/ms_smiles_dataset.pkl')
     parser.add_argument('--load_from_model', type=str, default='')
     parser.add_argument('--save_model', type=str, default='./model/test')
-    parser.add_argument('--save_mode', type=str, choices=['all', 'best'], default='all')
+    parser.add_argument('--save_mode', type=str, choices=['all', 'best'], default='best')
     parser.add_argument('--epoch', type=int, default=500)
-    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--batch_size', type=int, default=24)
     parser.add_argument('--d_word_vec', type=int, default=512)
     parser.add_argument('--d_model', type=int, default=256)
     parser.add_argument('--d_inner_hid', type=int, default=512)
-    parser.add_argument('--d_k', type=int, default=64)
-    parser.add_argument('--d_v', type=int, default=64)
-    parser.add_argument('--n_head', type=int, default=8)
+    parser.add_argument('--d_k', type=int, default=128)
+    parser.add_argument('--d_v', type=int, default=128)
+    parser.add_argument('--n_head', type=int, default=6)
     parser.add_argument('--n_encoder_layers', type=int, default=8)
     parser.add_argument('--n_decoder_layers', type=int, default=8)
     parser.add_argument('--n_warmup_steps', type=int, default=2048)
@@ -290,9 +290,9 @@ if __name__ == '__main__':
 
     opt.max_token_seq_len = loaded_data['settings'].max_token_seq_len
     training_data, validation_data = prepare_dataloaders(loaded_data, opt)
-    opt.src_mz_size = training_data.dataset.src_mz_size
-    opt.src_ms_size = training_data.dataset.src_ms_size
-    opt.tgt_mz_size = training_data.dataset.tgt_mz_size
+    opt.src_mz_size = training_data.dataset.src_mz_size + BOS + 1
+    opt.src_ms_size = training_data.dataset.src_ms_size + BOS + 1
+    opt.tgt_mz_size = training_data.dataset.tgt_mz_size + BOS + 1 ## the indices starts at BOS now, so the embedding dim should be larger
 
     #========= Preparing Model =========#
     if opt.embs_share_weight:
@@ -300,14 +300,13 @@ if __name__ == '__main__':
             'The src/tgt word2idx table are different but asked to share word embedding.'
 
     device = torch.device('cuda' if opt.cuda else 'cpu')
-    # device = torch.device('cpu')
-    torch.manual_seed(42)
+    # torch.manual_seed(42)
     
     transformer = Tensorized_T(
         opt.src_mz_size, ## size of the dictionary, i.e. number of m/z. Max=700, so this gives us 70000 embeddings with round to 0.01.
         opt.src_ms_size, ## size of the dictionary, i.e. number of intensities. 100 -> 100.
         opt.tgt_mz_size, ## size of the dictionary, i.e. number of m/z. Max=700, so this gives us 70000 embeddings with round to 0.01.
-        opt.max_token_seq_len, ## max length of the sequence
+        opt.max_token_seq_len, ## max length of the sequence, 2+1 has been added in data_gen already
         tgt_emb_prj_weight_sharing=opt.proj_share_weight,
         emb_src_tgt_weight_sharing=opt.embs_share_weight,
         d_k=opt.d_k,

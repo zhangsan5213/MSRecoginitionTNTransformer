@@ -76,7 +76,6 @@ def get_subsequent_mask(seq):
 #         ms = self.leaky_relu(self.lin22(self.leaky_relu(self.lin21(_ms))))
 #         return torch.einsum("abcdefghi,def,ghi->abc", [mz, ms, self.contraction])
         
-
 class TEncoder(nn.Module):
     ''' A encoder model with self attention mechanism. '''
 
@@ -110,14 +109,8 @@ class TEncoder(nn.Module):
         non_pad_mask = get_non_pad_mask(src_seq)
 
         # -- Forward
-        # print(src_seq.shape)
-        # print(self.src_word_emb)
-        # print(self.position_enc)
-        # print(self.src_word_emb(src_seq))
-        # print(self.position_enc(src_seq))
         enc_output = self.src_word_emb(src_seq) + self.position_enc(src_pos)
         for enc_layer in self.layer_stack:
-            # print(return_attns)
             enc_output, enc_slf_attn = enc_layer(
                 enc_output,
                 non_pad_mask=non_pad_mask,
@@ -167,6 +160,7 @@ class TDecoder(nn.Module):
         dec_enc_attn_mask = get_attn_key_pad_mask(seq_k=src_seq, seq_q=tgt_seq)
 
         # -- Forward
+        # print(tgt_seq.max(), self.tgt_word_emb, tgt_pos.max(), self.position_enc)
         dec_output = self.tgt_word_emb(tgt_seq) + self.position_enc(tgt_pos)
 
         for dec_layer in self.layer_stack:

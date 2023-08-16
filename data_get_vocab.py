@@ -1,11 +1,12 @@
 import sys
 import pickle
 import argparse
+from tqdm import tqdm
 # from hgraph import *
 # from rdkit import Chem
 from multiprocessing import Pool
 
-from tqdm import tqdm
+from transformer.Constants import BOS_WORD, EOS_WORD
 
 def dump_vocab(smiles_file='./data/smiles.txt', vocab_file='./data/vocab.pkl'):
     smiles = open(smiles_file, 'r').read().splitlines()
@@ -13,8 +14,8 @@ def dump_vocab(smiles_file='./data/smiles.txt', vocab_file='./data/vocab.pkl'):
     for string in smiles:
         unique_chars.update(set(string))
     unique_chars_list = list(unique_chars)
+    unique_chars_list += [BOS_WORD, EOS_WORD]
     unique_chars_list.sort()
-
     pickle.dump(unique_chars_list, open(vocab_file, 'wb'))
 
 if __name__ == '__main__':
