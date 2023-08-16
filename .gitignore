@@ -1,5 +1,6 @@
+.vscode
+__pycache__
 model
 data
-backups
-.vscode
-*/__pycache__/*
+temp
+hgraph

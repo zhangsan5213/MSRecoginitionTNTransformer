@@ -62,4 +62,4 @@ def fab_raw_data_file(file_name="./data/raw_ms_smiles_data.pkl", num=None):
     smiles_file.close()
 
 if __name__ == '__main__':
-    fab_raw_data_file(file_name='./data/raw_ms_smiles_data_trial.pkl', num=50000)
+    fab_raw_data_file(file_name='./data/raw_ms_smiles_data_trial.pkl', num=10000)
