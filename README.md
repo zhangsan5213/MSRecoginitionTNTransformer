@@ -9,3 +9,6 @@ Run **data_gen** to generate the train dataset.
 **train**.
 
 **translate**.
+
+**TO DO**
+1, more complicated function-group-based tokenization.

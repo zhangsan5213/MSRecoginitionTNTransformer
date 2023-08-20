@@ -229,6 +229,7 @@ if __name__ == '__main__':
     parser.add_argument('--shuffle_dataset', type=int, default=0)
     parser.add_argument('--data_path_name', default='./data/ms_smiles_dataset.pkl')
     parser.add_argument('--load_from_model', type=str, default='')
+    parser.add_argument('--learning_rate', type=float, default=8e-5)
     parser.add_argument('--save_model', type=str, default='./model/test')
     parser.add_argument('--save_mode', type=str, choices=['all', 'best'], default='best')
     parser.add_argument('--epoch', type=int, default=500)
@@ -300,7 +301,7 @@ if __name__ == '__main__':
             'The src/tgt word2idx table are different but asked to share word embedding.'
 
     device = torch.device('cuda' if opt.cuda else 'cpu')
-    # torch.manual_seed(42)
+    torch.manual_seed(42)
     
     transformer = Tensorized_T(
         opt.src_mz_size, ## size of the dictionary, i.e. number of m/z. Max=700, so this gives us 70000 embeddings with round to 0.01.
@@ -330,7 +331,7 @@ if __name__ == '__main__':
     optimizer = ScheduledOptim(
         optim.Adam(
             filter(lambda x: x.requires_grad, transformer.parameters()),
-            lr=8e-5,
+            lr=opt.learning_rate,
             betas=(0.9, 0.98),
             eps=1e-8),
         opt.d_model, opt.n_warmup_steps)
