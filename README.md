@@ -1,3 +1,5 @@
+## Use
+
 Run **docker_batch** to calculate MS from SMILES using CFMID.
 
 Run **data_ms** to collect MS and SMILES data calculated using CFMID.
@@ -8,7 +10,8 @@ Run **data_gen** to generate the train dataset.
 
 **train**.
 
-**translate**.
+**translate** (not finished yet).
 
-**TO DO**
+## To do
+
 1, more complicated function-group-based tokenization.
